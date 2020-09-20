@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+</head>
+<body>
+
+<svg id="pump_map" style="margin: 0 auto; display: block;"></svg>
+
+<script src="https://d3js.org/d3.v6.min.js"></script>
+<!--<script src="index.js" type="module"></script>-->
+
+<script>
+    const createMap = () => {
+        const { streets } = require('./streets.json');
+        import d3 from 'd3'
+
+        const svg = d3.select('#pump_map')
+        streets.each((seg) => {
+            svg.append('line')
+                .style("stroke", "lightgreen")
+                .style("stroke-width", 10)
+                .attr("x1", seg[0]['x'])
+                .attr("y1", seg[0]['y'])
+                .attr("x2", seg[1]['x'])
+                .attr("y2", seg[1]['y'])
+        })
+    }
+</script>
+</body>
+</html>
