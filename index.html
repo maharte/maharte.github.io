@@ -20,7 +20,7 @@
     console.log('hi')
     const createMap = () => {
         const svg = d3.select('#pump_map')
-        streets.each((seg) => {
+        data.each((seg) => {
             svg.append('line')
                 .style("stroke", "lightgreen")
                 .style("stroke-width", 10)
