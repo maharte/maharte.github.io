@@ -6,50 +6,62 @@
     <script src="https://d3js.org/d3.v6.js"></script>
 </head>
 <body>
-<svg id="pump_map" style="margin: 0 auto; display: block;"></svg>
+<svg id="pump_map" style="margin: 0 auto; width: 625px; height: 580px;"></svg>
 
 
 <!--<script src="index.js" type="module"></script>-->
 <script>
     // fr.readAsText('streets.json');
     // var reader = new FileReader().readAsText('streets.json');
+    files = []
+    files.push(d3.json("./streets.json"));
+    files.push(d3.csv('pumps.csv'));
+    files.push(d3.csv('deathdays.csv'));
+    files.push(d3.csv('deaths_age_sex.csv'));
 
-    let data = d3.json("./streets.json").then((d) => {
-        console.log(d);
+    const createMap = (streets, scale, xOffset, yOffset) => {
+        const svg = d3.select('#pump_map');
+        streets.forEach((seg) => {
+            lines = svg.append('path')
+                .attr("stroke", "black")
+                .attr("stroke-width", 1)
+                .attr("fill", "none")
+                .datum(seg)
+                .attr("d",
+                    d3.line()
+                        .x(function(d) { return d['x'] * scale - xOffset})
+                        .y(function(d) { return d['y'] * scale - yOffset})
+                );
+        });
+    }
 
+    const addPumps = (pumps, scale, xOffset, yOffset) => {
+        const svg = d3.select('#pump_map');
+        console.log(pumps);
+        pumps.forEach((cords) => {
+            svg.append('circle')
+                .style("fill", "purple")
+                // .style("stroke-width", 5)
+                .attr("cx", cords['x'] * scale - xOffset)
+                .attr("cy", cords['y'] * scale - yOffset)
+                .attr("r", 10)
+        })
+    }
+
+    Promise.all(files).then((data) => {
+        console.log(data);
         console.log('hi');
-        const createMap = () => {
-            const svg = d3.select('#pump_map')
-            d.each((seg) => {
-                svg.append('line')
-                    .style("stroke", "lightgreen")
-                    .style("stroke-width", 10)
-                    .attr("x1", seg[0]['x'])
-                    .attr("y1", seg[0]['y'])
-                    .attr("x2", seg[1]['x'])
-                    .attr("y2", seg[1]['y'])
-            })
-        }
-        createMap();
-        }
+        const scale = 35;
+        const yOffset = 95
+        const xOffset = 95
+        createMap(data[0], scale, yOffset, xOffset);
+        addPumps(data[1], scale, yOffset, xOffset);
+    });
 
-    );
-    // console.log(data);
-    //
-    // console.log('hi')
-    // const createMap = () => {
-    //     const svg = d3.select('#pump_map')
-    //     data.each((seg) => {
-    //         svg.append('line')
-    //             .style("stroke", "lightgreen")
-    //             .style("stroke-width", 10)
-    //             .attr("x1", seg[0]['x'])
-    //             .attr("y1", seg[0]['y'])
-    //             .attr("x2", seg[1]['x'])
-    //             .attr("y2", seg[1]['y'])
-    //     })
-    // }
-    // createMap();
+
+
+
+
 </script>
 <script>
 
