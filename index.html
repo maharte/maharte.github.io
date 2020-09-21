@@ -14,23 +14,42 @@
     // fr.readAsText('streets.json');
     // var reader = new FileReader().readAsText('streets.json');
 
-    let data = d3.json("./streets.json");
-    console.log(data);
+    let data = d3.json("./streets.json").then((d) => {
+        console.log(d);
 
-    console.log('hi')
-    const createMap = () => {
-        const svg = d3.select('#pump_map')
-        data.each((seg) => {
-            svg.append('line')
-                .style("stroke", "lightgreen")
-                .style("stroke-width", 10)
-                .attr("x1", seg[0]['x'])
-                .attr("y1", seg[0]['y'])
-                .attr("x2", seg[1]['x'])
-                .attr("y2", seg[1]['y'])
-        })
-    }
-    createMap();
+        console.log('hi');
+        const createMap = () => {
+            const svg = d3.select('#pump_map')
+            d.each((seg) => {
+                svg.append('line')
+                    .style("stroke", "lightgreen")
+                    .style("stroke-width", 10)
+                    .attr("x1", seg[0]['x'])
+                    .attr("y1", seg[0]['y'])
+                    .attr("x2", seg[1]['x'])
+                    .attr("y2", seg[1]['y'])
+            })
+        }
+        createMap();
+        }
+
+    );
+    // console.log(data);
+    //
+    // console.log('hi')
+    // const createMap = () => {
+    //     const svg = d3.select('#pump_map')
+    //     data.each((seg) => {
+    //         svg.append('line')
+    //             .style("stroke", "lightgreen")
+    //             .style("stroke-width", 10)
+    //             .attr("x1", seg[0]['x'])
+    //             .attr("y1", seg[0]['y'])
+    //             .attr("x2", seg[1]['x'])
+    //             .attr("y2", seg[1]['y'])
+    //     })
+    // }
+    // createMap();
 </script>
 <script>
 
