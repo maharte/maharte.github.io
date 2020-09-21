@@ -3,19 +3,22 @@
 <head>
     <meta charset="UTF-8">
     <title>Title</title>
+    <script src="https://d3js.org/d3.v6.js"></script>
 </head>
 <body>
-
 <svg id="pump_map" style="margin: 0 auto; display: block;"></svg>
 
-<script src="https://d3js.org/d3.v6.min.js"></script>
+
 <!--<script src="index.js" type="module"></script>-->
-
 <script>
-    const createMap = () => {
-        const { streets } = require('./streets.json');
-        import d3 from 'd3'
+    // fr.readAsText('streets.json');
+    // var reader = new FileReader().readAsText('streets.json');
 
+    let data = d3.json("./streets.json");
+    console.log(data);
+
+    console.log('hi')
+    const createMap = () => {
         const svg = d3.select('#pump_map')
         streets.each((seg) => {
             svg.append('line')
@@ -27,6 +30,10 @@
                 .attr("y2", seg[1]['y'])
         })
     }
+    createMap();
+</script>
+<script>
+
 </script>
 </body>
 </html>

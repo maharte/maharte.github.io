@@ -1,17 +1,20 @@
-// app.js
-const http = require('http');
+const { streets } = require('./streets.json');
 
-// Create an instance of the http server to handle HTTP requests
-let app = http.createServer((req, res) => {
-    // Set a response type of plain text for the response
-    res.writeHead(200, {'Content-Type': 'text/plain'});
+d3.json("temp.json", function(error, data){
+    //use data here
+})
 
-    // Send back a response and end the connection
-    res.end('Hello World!\n');
-});
-
-// Start the server on port 3000
-app.listen(3000, '127.0.0.1');
-console.log('Node server running on port 3000');
+const createMap = () => {
+    const svg = d3.select('#pump_map')
+    streets.each((seg) => {
+        svg.append('line')
+            .style("stroke", "lightgreen")
+            .style("stroke-width", 10)
+            .attr("x1", seg[0]['x'])
+            .attr("y1", seg[0]['y'])
+            .attr("x2", seg[1]['x'])
+            .attr("y2", seg[1]['y'])
+    })
+}
 
 
