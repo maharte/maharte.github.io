@@ -6,20 +6,82 @@
     <script src="https://d3js.org/d3.v6.js"></script>
 </head>
 <body>
-<svg id="pump_map" style="margin: 0 auto; width: 625px; height: 580px;"></svg>
 
+<label for="deathByAge">Filter by Age</label>
+<select name="deathByAge" id="deathByAge" onchange="filterByAge()">>
+    <option value="-1">All</option>
+    <option value="0">0-10</option>
+    <option value="1">11-20</option>
+    <option value="2">21-40</option>
+    <option value="3">41-60</option>
+    <option value="4">61-80</option>
+    <option value="5">> 80</option>
+</select>
 
-<!--<script src="index.js" type="module"></script>-->
+<br>
+
+<label for="deathByGender">Filter by Gender</label>
+<select name="deathByGender" id="deathByGender" onchange="filterByGender()">
+    <option value="-1">All</option>
+    <option value="male">Male</option>
+    <option value="female">Female</option>
+</select>
+
+<br>
+
+<svg id="pump_map" style="margin: 0 auto; width: 625px; height: 580px; transform: scale(1,-1);"></svg>
+
 <script>
-    // fr.readAsText('streets.json');
-    // var reader = new FileReader().readAsText('streets.json');
     files = []
     files.push(d3.json("./streets.json"));
     files.push(d3.csv('pumps.csv'));
     files.push(d3.csv('deathdays.csv'));
     files.push(d3.csv('deaths_age_sex.csv'));
+    const AGE = 'age';
+    const MALE_COLOR = 'blue';
+    const FEMALE_COLOR = 'red';
+    const GENDER = 'gender';
+    const ALL = '-1';
+    const SCALE = 35;
+    const Y_OFFSET = 95
+    const X_OFFSET = 95
+    const svg = d3.select('#pump_map');
 
-    const createMap = (streets, scale, xOffset, yOffset) => {
+    const filterByAge = () => {
+        let ageVal = document.getElementById('deathByAge').value
+        filterPumps(AGE, ageVal);
+    }
+
+    const filterByGender = () => {
+        let genderVal = document.getElementById('deathByGender').value
+        filterPumps(GENDER, genderVal);
+    }
+
+    const filterPumps = (filterType, filterValue) => {
+        if (filterValue === ALL) {
+            switch (filterType) {
+                case GENDER:
+                    d3.selectAll(`#pump_map circle.death.male, circle.death.female`)
+                        .style("visibility", "visible");
+                    break;
+                case AGE:
+                    d3.selectAll(`#pump_map circle.death.age-0, circle.death.age-1, circle.death.age-2, circle.death.age-3, `
+                    + `circle.death.age-4, circle.death.age-5`)
+                        .style("visibility", "visible");
+                    break;
+            }
+        } else {
+            if (filterType === AGE) {
+                filterValue = `age-${filterValue}`;
+            }
+            d3.selectAll(`#pump_map circle.death:not(.${filterValue})`)
+                .style("visibility", "hidden");
+            d3.selectAll(`#pump_map circle.death.${filterValue}`)
+                .style("visibility", "visible");
+        }
+    };
+
+    const createMap = (streets) => {
         const svg = d3.select('#pump_map');
         streets.forEach((seg) => {
             lines = svg.append('path')
@@ -29,33 +91,99 @@
                 .datum(seg)
                 .attr("d",
                     d3.line()
-                        .x(function(d) { return d['x'] * scale - xOffset})
-                        .y(function(d) { return d['y'] * scale - yOffset})
+                        .x(function(d) { return d['x'] * SCALE - X_OFFSET})
+                        .y(function(d) { return d['y'] * SCALE - Y_OFFSET})
                 );
         });
     }
 
-    const addPumps = (pumps, scale, xOffset, yOffset) => {
+    const addPumps = (pumps) => {
         const svg = d3.select('#pump_map');
-        console.log(pumps);
         pumps.forEach((cords) => {
             svg.append('circle')
                 .style("fill", "purple")
-                // .style("stroke-width", 5)
-                .attr("cx", cords['x'] * scale - xOffset)
-                .attr("cy", cords['y'] * scale - yOffset)
-                .attr("r", 10)
+                .attr("cx", cords['x'] * SCALE - X_OFFSET)
+                .attr("cy", cords['y'] * SCALE - Y_OFFSET)
+                .attr("r", 5)
         })
     }
 
+    const splitDeathsByDay = (deathByDays, totalDeaths) => {
+        // {date: Date, deaths: int, deathDetails: []}
+        let aggDeathData = [];
+        deathByDays.forEach((deathDay) => {
+            let deathsThisDay = deathDay['deaths'];
+            let deathDeets = [];
+            for(let i = 0; i < deathsThisDay; i++) {
+                deathDeets.push(totalDeaths.shift());
+            }
+            aggDeathData.push({date: deathDay['date'], deaths: deathDay['deaths'], deathDetails: deathDeets});
+        })
+        return aggDeathData;
+    }
+
+    const addDeathsToMap = (aggDeaths) => {
+
+        aggDeaths.forEach((deathDay) => {
+        //     deathDay['deathDetails'].forEach((death) => {
+        //         let deathGender = death['gender'] === '0' ? 'male' : 'female';
+        //         let fillColor = deathGender === 'male' ? MALE_COLOR : FEMALE_COLOR;
+        //         svg.append('circle')
+        //             .style("fill", fillColor)
+        //             .attr("cx", death['x'] * SCALE - X_OFFSET)
+        //             .attr("cy", death['y'] * SCALE - Y_OFFSET)
+        //             .attr("r", 2)
+        //             .attr("class", `death age-${death['age']} ${deathGender} ${deathDay['date']}`)
+        //     })
+        // })
+        // aggDeaths.forEach((deathDay) => {
+        //     deathDay['deathDetails'].forEach((death) => {
+        //         let deathGender = death['gender'] === '0' ? 'male' : 'female';
+        //         let fillColor = deathGender === 'male' ? MALE_COLOR : FEMALE_COLOR;
+        //         svg.append('path')
+        //             .data(death)
+        //             .style("fill", fillColor)
+        //             .attr("class", `death age-${death['age']} ${deathGender} ${deathDay['date']}`)
+        //             .attr("d", d3.symbol().type(d3.symbolCircle).size(10))
+        //             .attr("transform", function (d) {
+        //                 console.log(d['x'] * SCALE - X_OFFSET, d['y'] * SCALE - Y_OFFSET);
+        //                 console.log(`translate(${d['x'] * SCALE - X_OFFSET}, ${d['y'] * SCALE - Y_OFFSET})`);
+        //                 return `translate(${d['x'] * SCALE - X_OFFSET}, ${d['y'] * SCALE - Y_OFFSET})`;
+        //             })
+        //         console.log(deathDay);
+        //
+        //     });
+            console.log(deathDay['deathDetails']);
+            svg.selectAll(`.death-${deathDay['date']}`)
+                .data(deathDay['deathDetails'])
+                .enter()
+                .append('path')
+                .style("fill", (d) => d['gender'] === '0' ? MALE_COLOR : FEMALE_COLOR)
+                .attr("class", (d) => {
+                    let deathGender = d['gender'] === '0' ? 'male' : 'female';
+                    return `death age-${d['age']} ${deathGender} ${deathDay['date']}`
+                })
+                .attr("d", (d) => {
+                    return d3.symbol().type(d3.symbols[parseInt(d['age'])]).size(35)()
+                })
+                // .attr("d", d3.symbol().type(d3.symbols[2]))
+                .attr("transform", function(d) {
+                    console.log(d['x'] * SCALE - X_OFFSET, d['y'] * SCALE - Y_OFFSET);
+                    console.log(`translate(${d['x'] * SCALE - X_OFFSET}, ${d['y'] * SCALE - Y_OFFSET})`);
+                    return `translate(${d['x'] * SCALE - X_OFFSET}, ${d['y'] * SCALE - Y_OFFSET})`;
+                })
+        })
+
+    }
+
     Promise.all(files).then((data) => {
-        console.log(data);
-        console.log('hi');
-        const scale = 35;
-        const yOffset = 95
-        const xOffset = 95
-        createMap(data[0], scale, yOffset, xOffset);
-        addPumps(data[1], scale, yOffset, xOffset);
+
+        createMap(data[0]);
+        addPumps(data[1]);
+        let aggDeaths = splitDeathsByDay(data[2], data[3]);
+        addDeathsToMap(aggDeaths);
+
+        //visibility: hidden;
     });
 
 
