@@ -8,7 +8,7 @@
 <body>
 
 <label for="deathByAge">Filter by Age</label>
-<select name="deathByAge" id="deathByAge" onchange="filterByAge()">>
+<select name="deathByAge" id="deathByAge" onchange="filterPumps()">>
     <option value="-1">All</option>
     <option value="0">0-10</option>
     <option value="1">11-20</option>
@@ -21,7 +21,7 @@
 <br>
 
 <label for="deathByGender">Filter by Gender</label>
-<select name="deathByGender" id="deathByGender" onchange="filterByGender()">
+<select name="deathByGender" id="deathByGender" onchange="filterPumps()">
     <option value="-1">All</option>
     <option value="male">Male</option>
     <option value="female">Female</option>
@@ -49,39 +49,48 @@
     const X_OFFSET = 95
     const pumpSvg = d3.select('#pump_map');
     const timelineSvg = d3.select('#timeline')
-    const filterByAge = () => {
-        let ageVal = document.getElementById('deathByAge').value
-        filterPumps(AGE, ageVal);
+
+    const makeAllVisibleByAge = () => {
+        d3.selectAll(`#pump_map .death.age-0, .death.age-1, .death.age-2, .death.age-3, `
+            + `circle.death.age-4, .death.age-5`)
+            .style("visibility", "visible");
     }
 
-    const filterByGender = () => {
-        let genderVal = document.getElementById('deathByGender').value
-        filterPumps(GENDER, genderVal);
+    const makeAllVisibleByGender = () => {
+        d3.selectAll(`#pump_map .death.male, .death.female`)
+            .style("visibility", "visible");
     }
 
-    const filterPumps = (filterType, filterValue) => {
-        if (filterValue === ALL) {
-            switch (filterType) {
-                case GENDER:
-                    d3.selectAll(`#pump_map .death.male, .death.female`)
-                        .style("visibility", "visible");
-                    break;
-                case AGE:
-                    d3.selectAll(`#pump_map .death.age-0, .death.age-1, .death.age-2, .death.age-3, `
-                        + `circle.death.age-4, .death.age-5`)
-                        .style("visibility", "visible");
-                    break;
+    const filterPumps = (filterValue) => {
+        const genderVal = document.getElementById('deathByGender').value;
+        const ageVal = document.getElementById('deathByAge').value;
+        if (genderVal === ALL) {
+            makeAllVisibleByGender();
+            if(ageVal !== ALL) {
+                d3.selectAll(`#pump_map .death:not(.age-${ageVal})`)
+                    .style("visibility", "hidden");
+                d3.selectAll(`#pump_map .death:not(.age-${ageVal})`)
+                    .style("visibility", "hidden");
             }
-        } else {
-            if (filterType === AGE) {
-                filterValue = `age-${filterValue}`;
-            }
-            d3.selectAll(`#pump_map .death:not(.${filterValue})`)
-                .style("visibility", "hidden");
-            d3.selectAll(`#pump_map .death.${filterValue}`)
-                .style("visibility", "visible");
         }
-    };
+        if (ageVal === ALL) {
+            makeAllVisibleByAge()
+            if (genderVal !== ALL) {
+                d3.selectAll(`#pump_map .death.${genderVal}`)
+                    .style("visibility", "visible");
+                d3.selectAll(`#pump_map .death:not(.${genderVal})`)
+                    .style("visibility", "hidden");
+            }
+        }
+
+        if (genderVal !== ALL && ageVal !== ALL) {
+            d3.selectAll(`#pump_map .death.age-${ageVal},.death.${genderVal}`)
+                .style("visibility", "visible");
+            d3.selectAll(`#pump_map .death:not(.age-${ageVal}),.death:not(.${genderVal})`)
+                .style("visibility", "hidden");
+        }
+
+    }
 
     const createMap = (streets) => {
         streets.forEach((seg) => {
