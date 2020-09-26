@@ -141,7 +141,7 @@
                 .style("fill", (d) => d['gender'] === '0' ? MALE_COLOR : FEMALE_COLOR)
                 .attr("class", (d) => {
                     let deathGender = d['gender'] === '0' ? 'male' : 'female';
-                    return `death age-${d['age']} ${deathGender} ${deathDay['date']}`
+                    return `death age-${d['age']} ${deathGender} date-${deathDay['date']}`
                 })
                 .attr("d", (d) => {
                     return d3.symbol().type(d3.symbols[parseInt(d['age'])]).size(35)()
@@ -198,32 +198,73 @@
             .style('opacity', '0')
             .attr("transform", d => `translate(${20 + xScale(timeConv(d.date))}, 0)`)
             .on('mouseout', function() { // on mouse out hide line, circles and text
-                d3.selectAll(`.date-${d3.select(this).data()[0].date}`)
+                timelineSvg.selectAll(`.date-${d3.select(this).data()[0].date}`)
                     .style("opacity", "0")
-                    .attr("transform", (d) => {
-                        console.log(d.date, d.deaths);
-                        return `translate(0,0)`
+                    .attr("transform", (d, i) => {
+                        if (d.date !== undefined) {
+                            // console.log('MOUSE OUT', d.date, d.deaths);
+                            return `translate(0,0)`
+                        }
                     })
             })
             .on('mouseover', function(event, datum) { // on mouse in show line, circles and text
                 const mouse = d3.pointer(event);
-                console.log(d3.select(`.date-${d3.select(this).data()[0].date}`));
-                console.log(d3.select(`.date-${d3.select(this).data()[0].date}`));
-
-                d3.selectAll(`.date-${d3.select(this).data()[0].date}`)
+                timelineSvg.selectAll(`.date-${d3.select(this).data()[0].date}`)
                     .style("opacity", "1")
-                    .attr("transform", (d) => {
-                        console.log(d.date, d.deaths);
-                        return `translate(${xScale(timeConv(d.date))},${yScale(d.deaths)})`
+                    .attr("transform", (d, i) => {
+                        if (d.date !== undefined) {
+                            // console.log('MOUSE OVER POINT', d.date, d.deaths, d, i);
+                            return `translate(${xScale(timeConv(d.date))},${yScale(d.deaths)})`
+                        }
+
                     })
-                d3.selectAll(`text.date-${d3.select(this).data()[0].date}`)
+                timelineSvg.selectAll(`text.date-${d3.select(this).data()[0].date}`)
                     .style("opacity", "1")
-                    .attr("transform", (d) => {
-                        console.log(d.date, d.deaths);
-                        return `translate(${xScale(timeConv(d.date)) + 10},${yScale(d.deaths) - 5})`
+                    .attr("transform", (d, i) => {
+                        if (d.date !== undefined) {
+                            // console.log('MOUSE OVER TEXT', d.date, d.deaths);
+                            return `translate(${xScale(timeConv(d.date)) + 10},${yScale(d.deaths) - 5})`
+                        }
                     })
 
+                let dateCssSelector = `.date-${d3.select(this).data()[0].date}`;
+                console.log(dateCssSelector)
+                d3.selectAll(`#pump_map .death${dateCssSelector}`)
+                    .style("visibility", "visible");
+                d3.selectAll(`#pump_map .death:not(${dateCssSelector})`)
+                    .style("visibility", "hidden");
             })
+
+        let rightBuffer = xBuffer + 20
+        let leftBuffer = xBuffer - 60
+        let rectThickness = 60
+        const rectData = [{x1:leftBuffer , y1:-rectThickness, x2:leftBuffer + rectThickness, y2:height + rectThickness}, // left of timeline
+            {x1:leftBuffer, y1:-rectThickness, x2:width + rightBuffer, y2:rectThickness}, // top of timeline
+            {x1:width + rightBuffer, y1:0, x2:width + rightBuffer + rectThickness, y2:height + rectThickness}, // right of timeline
+            {x1:leftBuffer, y1:height + rectThickness, x2: width + rightBuffer + rectThickness, y2: height + rectThickness * 2} // bottom of timeline
+            ]
+
+        console.log(rectData);
+        timelineSvg.selectAll('timeline-border')
+            .data(rectData)
+            .enter()
+            .append('rect')
+            .attr("fill", "red")
+            .style('opacity', '0')
+            .attr("class", "timeline-border")
+            .attr("x", d => d.x1)
+            .attr("y", d => d.y1)
+            .attr("width", d => {
+                console.log(d);
+                return d.x2 - d.x1
+            })
+            .attr("height", d => {
+                console.log(d);
+                return d.y2 - d.y1
+            })
+            .on('mouseover', () => {
+                filterPumps();
+            });
 
         timelineSvg.append("path")
             .datum(aggDeaths)
