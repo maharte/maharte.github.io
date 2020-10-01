@@ -6,41 +6,41 @@
     <script src="https://d3js.org/d3.v6.js"></script>
 </head>
 <body>
+<svg id="pump-legend" style="margin-left: 25px; margin-top:15px; width: 350px; height: 110px; display:inline-block"></svg>
+<div style="display:inline-block; transform: translateY(-120%); margin-left: 20px;">
+    <div>
+        <label for="deathByAge">Filter by Age</label>
+        <select name="deathByAge" id="deathByAge" onchange="filterPumps()" style="margin-left: 21px; width: 72px;">>
+            <option value="-1">All</option>
+            <option value="0">0-10</option>
+            <option value="1">11-20</option>
+            <option value="2">21-40</option>
+            <option value="3">41-60</option>
+            <option value="4">61-80</option>
+            <option value="5">> 80</option>
+        </select>
+    </div>
 
-<label for="deathByAge">Filter by Age</label>
-<select name="deathByAge" id="deathByAge" onchange="filterPumps()">>
-    <option value="-1">All</option>
-    <option value="0">0-10</option>
-    <option value="1">11-20</option>
-    <option value="2">21-40</option>
-    <option value="3">41-60</option>
-    <option value="4">61-80</option>
-    <option value="5">> 80</option>
-</select>
+    <div>
+        <label for="deathByGender">Filter by Gender</label>
+        <select name="deathByGender" id="deathByGender" onchange="filterPumps()" >
+            <option value="-1">All</option>
+            <option value="male">Male</option>
+            <option value="female">Female</option>
+        </select>
+    </div>
+</div>
 
 <br>
-
-<label for="deathByGender">Filter by Gender</label>
-<select name="deathByGender" id="deathByGender" onchange="filterPumps()">
-    <option value="-1">All</option>
-    <option value="male">Male</option>
-    <option value="female">Female</option>
-</select>
-
-<br>
-
-<!--<div style="width:625px; height:600px;">-->
-    <svg id="pump-legend" style="margin-left: 25px; margin-top:15px; width: 350px; height: 110px;"></svg>
-<br>
-<div style="border: solid lightgrey;width: 525px; height: 550px; overflow: hidden; display:inline-block">
-    <svg id="pump_map" style="background-color:seashell" viewBox="0 0 525 550"></svg>
+<div style="border: solid lightgrey;width: 400px; height: 375px; overflow: hidden; display:inline-block">
+    <svg id="pump_map" style="background-color:seashell; transform: scale(1, -1);" viewBox="0 0 525 550"></svg>
 </div>
 
 <!--</div>-->
-<svg id="timeline" style="width: 800px; height: 550px;"></svg>
+<svg id="timeline" style="width: 800px; height: 375px;"></svg>
 <br>
-<svg id="gender-bar-chart" style="margin-right: 100px; width: 400px; height: 500px;"></svg>
-<svg id="age-bar-chart" style="width: 600px; height: 500px;"></svg>
+<svg id="gender-bar-chart" style="margin-right: 100px; width: 400px; height: 255px;"></svg>
+<svg id="age-bar-chart" style="width: 600px; height: 255px;"></svg>
 
 <script>
     files = []
@@ -57,7 +57,7 @@
     const SCALE = 30;
     const Y_OFFSET = 25
     const X_OFFSET = 95
-    const pumpSvg = d3.select('#pump_map').attr('transform', 'scale(1,-1)');
+    const pumpSvg = d3.select('#pump_map').append('g');
     const timelineSvg = d3.select('#timeline').append('g')
     const pumpLegendSvg = d3.select('#pump-legend').append('g')
 
@@ -104,34 +104,22 @@
     }
 
     const createMap = (streets) => {
-        let pumpWidth = 525;
-        let pumpHeight = 550;
+        let pumpWidth = 400;
+        let pumpHeight = 400;
         pumpSvg.attr('width', `${pumpWidth}px`).attr('height', `${pumpHeight}px`)
 
         function handleZoom(event) {
 
             if (pumpSvg) {
-                // event.transform.x = event.sourceEvent.x * event.transform.k
-                // event.transform.y = event.sourceEvent.y * event.transform.k
-                pumpSvg.attr("transform", event.transform + " scale(1, -1) ");
+                d3.select('#pump_map g').attr("transform", `${event.transform}`);
             }
-
-            // Changing x and y from the event so that I can't drag into oblivion on accident.
-            // let tx = Math.min(0, Math.max(event.transform.x, pumpWidth - pumpWidth * event.transform.k));
-            // let ty = Math.min(0, Math.max(event.transform.y, pumpHeight - pumpHeight * event.transform.k));
-            //
-            // // manually drawing the zoom with my new coordinates.  Dont forget that
-            // pumpSvg.attr("transform", [
-            //     "translate(" + [tx, ty] + ")",
-            //     "scale(" + event.transform.k + ") scale(1, -1) "
-            // ].join(" "));
-
         }
 
         let zoom = d3.zoom()
-            .scaleExtent([1, 10])
+            .scaleExtent([1, 4])
             .on("zoom", handleZoom)
-        pumpSvg.call(zoom)
+
+        d3.select('#pump_map').call(zoom, d3.zoomIdentity.scale(1,-1))
 
         streets.forEach((seg) => {
             lines = pumpSvg.append('path')
@@ -145,6 +133,7 @@
                         .y(function(d) {return d['y'] * SCALE - Y_OFFSET})
                 )
         });
+
         pumpSvg.append('text')
             .text('Brewery')
             .style('font-size', '8px')
@@ -305,7 +294,7 @@
 
     const createTimeline = (aggDeaths) => {
         const width = 550;
-        const height = 400;
+        const height = 250;
         const yBuffer = 25;
         const xBuffer = 30;
         const timeConv = d3.timeParse("%d-%b");
@@ -487,7 +476,7 @@
 
     createAgeDistributionBarChat = (aggDeaths) => {
         let barWidth = 300;
-        let barHeight = 400;
+        let barHeight = 190;
 
         const genderBarChart = d3.select("#gender-bar-chart");
         const ageBarChart = d3.select("#age-bar-chart")
@@ -548,7 +537,7 @@
             .attr("text-anchor", "end")
             .attr("transform", "rotate(-90)")
             .attr("y", -40)
-            .attr("x", - 150)
+            .attr("x", - 50)
             .text("Total Deaths")
 
         // Title
@@ -573,7 +562,6 @@
             .attr('fill', MALE_COLOR)
             .style('opacity', '1')
             .attr("transform", (d,i) => {
-                // console.log(d)
                 return `translate(${xScale('male') - 25}, ${barHeight - yScale(genderMax - reducedMales)})`
             })
 
@@ -630,7 +618,7 @@
             .attr("text-anchor", "end")
             .attr("transform", "rotate(-90)")
             .attr("y", -40)
-            .attr("x", - 150)
+            .attr("x", - 50)
             .text("Total Deaths")
 
         // Title
