@@ -60,47 +60,108 @@
     const pumpSvg = d3.select('#pump_map').append('g');
     const timelineSvg = d3.select('#timeline').append('g')
     const pumpLegendSvg = d3.select('#pump-legend').append('g')
+    let xAgeScale;
+    let yAgeScale;
+    let xGenderScale;
+    let yGenderScale;
+    let genderMax;
+    let maxAgeHeight;
+    let barHeight;
+    let ageGroups;
 
     const makeAllVisibleByAge = () => {
         d3.selectAll(`#pump_map .death.age-0, .death.age-1, .death.age-2, .death.age-3, `
             + `circle.death.age-4, .death.age-5`)
-            .style("visibility", "visible");
+            .style("visibility", "visible")
+            .classed("visible", true);
     }
 
     const makeAllVisibleByGender = () => {
         d3.selectAll(`#pump_map .death.male, .death.female`)
-            .style("visibility", "visible");
+            .style("visibility", "visible")
+            .classed("visible", true);
     }
 
-    const filterPumps = () => {
+    const filterGender = () => {
+        d3.selectAll("#gender-bar-chart rect").nodes().forEach(n => {
+            n = d3.select(n);
+            if (n.attr('class').includes('.death-bar-female')) {
+                let barSize = yGenderScale(genderMax - d3.selectAll(`#pump_map .death.female.visible`).size())
+                n.attr('height', `${barSize}`)
+                    .attr("transform", `translate(${xGenderScale('female') - 150}, ${barHeight - barSize})`)
+            }
+            if (n.attr('class').includes('.death-bar-male')) {
+                let barSize = yGenderScale(genderMax - d3.selectAll(`#pump_map .death.male.visible`).size())
+                n.attr('height', `${barSize}`)
+                    .attr("transform", `translate(${xGenderScale('male') - 25}, ${barHeight - barSize})`)
+            }
+
+        })
+    }
+
+    const filterAge = () => {
+        ageGroups.forEach(ag => {
+            d3.selectAll("#age-bar-chart rect").nodes().forEach(n => {
+                n = d3.select(n);
+
+                if (n.attr('class').includes(`.death-bar-age-${ag[0]}`)) {
+                    let barSize = yAgeScale(maxAgeHeight - d3.selectAll(`#pump_map .death.age-${ag[0]}.visible`).size())
+                    console.log(`.death-bar-age-${ag[0]}`, barSize)
+                    n.attr('height', `${barSize}`)
+                    .attr("transform", `translate(${xAgeScale(ag[1]) - (20 + (78 * ag[0]))}, ${barHeight - barSize})`)
+                }
+            });
+        });
+    }
+
+    const filterPumps = (dateCssSelector=null) => {
         const genderVal = document.getElementById('deathByGender').value;
         const ageVal = document.getElementById('deathByAge').value;
+
         if (genderVal === ALL) {
             makeAllVisibleByGender();
             if(ageVal !== ALL) {
                 d3.selectAll(`#pump_map .death:not(.age-${ageVal})`)
-                    .style("visibility", "hidden");
+                    .style("visibility", "hidden")
+                    .classed("visible", true);
                 d3.selectAll(`#pump_map .death:not(.age-${ageVal})`)
-                    .style("visibility", "hidden");
+                    .style("visibility", "hidden")
+                    .classed("visible", false);
             }
         }
         if (ageVal === ALL) {
             makeAllVisibleByAge()
             if (genderVal !== ALL) {
                 d3.selectAll(`#pump_map .death.${genderVal}`)
-                    .style("visibility", "visible");
+                    .style("visibility", "visible")
+                    .classed("visible", true);
                 d3.selectAll(`#pump_map .death:not(.${genderVal})`)
-                    .style("visibility", "hidden");
+                    .style("visibility", "hidden")
+                    .classed("visible", false);
             }
         }
 
         if (genderVal !== ALL && ageVal !== ALL) {
             d3.selectAll(`#pump_map .death.age-${ageVal},.death.${genderVal}`)
-                .style("visibility", "visible");
+                .style("visibility", "visible")
+                .classed("visible", true);
             d3.selectAll(`#pump_map .death:not(.age-${ageVal}),.death:not(.${genderVal})`)
-                .style("visibility", "hidden");
+                .style("visibility", "hidden")
+                .classed("visible", false);
         }
 
+        if (dateCssSelector) {
+            // Filter the pump map
+            d3.selectAll(`#pump_map .visible.death${dateCssSelector}`)
+                .style("visibility", "visible")
+                .classed("visible", true);
+            d3.selectAll(`#pump_map .death:not(${dateCssSelector})`)
+                .style("visibility", "hidden")
+                .classed("visible", false);
+        }
+
+        filterGender();
+        filterAge();
     }
 
     const createMap = (streets) => {
@@ -281,7 +342,7 @@
                 .style('stroke', 'black')
                 .attr("class", (d) => {
                     let deathGender = d['gender'] === '0' ? 'male' : 'female';
-                    return `death age-${d['age']} ${deathGender} date-${deathDay['date']}`
+                    return `death age-${d['age']} ${deathGender} date-${deathDay['date']} visible`
                 })
                 .attr("d", (d) => {
                     return d3.symbol().type(d3.symbols[parseInt(d['age'])]).size(25)()
@@ -386,11 +447,8 @@
                     })
 
                 let dateCssSelector = `.date-${d3.select(this).data()[0].date}`;
-                console.log(dateCssSelector)
-                d3.selectAll(`#pump_map .death${dateCssSelector}`)
-                    .style("visibility", "visible");
-                d3.selectAll(`#pump_map .death:not(${dateCssSelector})`)
-                    .style("visibility", "hidden");
+
+                filterPumps(dateCssSelector);
             })
 
         let rightBuffer = xBuffer + 20
@@ -474,9 +532,13 @@
             .style('opacity', '0');
     }
 
+    updateAgeChart = () => {
+        pumpSvg.selectAll('')
+    }
+
     createAgeDistributionBarChat = (aggDeaths) => {
         let barWidth = 300;
-        let barHeight = 190;
+        barHeight = 190;
 
         const genderBarChart = d3.select("#gender-bar-chart");
         const ageBarChart = d3.select("#age-bar-chart")
@@ -505,11 +567,11 @@
 
         let reducedMales = genders['male'].reduce((accum, obj) => accum + parseInt(obj.deaths), 0)
         let reducedFemales = genders['female'].reduce((accum, obj) => accum + parseInt(obj.deaths), 0)
-        let genderMax = Math.max(reducedMales, reducedFemales) + 13;
+        genderMax = Math.max(reducedMales, reducedFemales) + 13;
 
         // Add axis scales
-        const xScale = d3.scaleBand().range([0, barWidth]).domain(['male', 'female']).padding(0.4)
-        const yScale = d3.scaleLinear().rangeRound([barHeight, 0]).domain([0, genderMax]);
+        xGenderScale = d3.scaleBand().range([0, barWidth]).domain(['male', 'female']).padding(0.4)
+        yGenderScale = d3.scaleLinear().rangeRound([barHeight, 0]).domain([0, genderMax]);
 
         // Add axis
         const genderBarG = genderBarChart.append("g")
@@ -517,10 +579,10 @@
 
         genderBarG.append("g")
             .attr("transform", "translate(0," + barHeight + ")")
-            .call(d3.axisBottom().scale(xScale).ticks(2));
+            .call(d3.axisBottom().scale(xGenderScale).ticks(2));
 
         genderBarG.append("g")
-            .call(d3.axisLeft(yScale).ticks(10))
+            .call(d3.axisLeft(yGenderScale).ticks(10))
             .append("text")
             .attr("text-anchor", "end")
             .text("value");
@@ -547,49 +609,42 @@
             .attr("x", 200)
             .text("Deaths by Gender")
 
-        // males rect
-        genderBarG.selectAll('.death-bar-male')
-            .data(genders['male'])
-            .enter()
-            .append('rect')
-            .attr('class', 'death-bar')
-            .attr('width', '25')
-            .attr('x', xScale('male'))
-            .attr('height', d => {
-                console.log(reducedMales, yScale(genderMax  - reducedMales))
-                return  yScale(genderMax - reducedMales)
-            })
-            .attr('fill', MALE_COLOR)
-            .style('opacity', '1')
-            .attr("transform", (d,i) => {
-                return `translate(${xScale('male') - 25}, ${barHeight - yScale(genderMax - reducedMales)})`
-            })
-
         // female rect
-        genderBarG.selectAll('.death-bar-female')
-            .data(genders['female'])
-            .enter()
+        genderBarG
+            // .data(genders['female'])
+            // .enter()
+            // .data([0, 1, 2])
             .append('rect')
-            .attr('class', 'death-bar')
+            .attr('class', 'death-bar .death-bar-female')
             .attr('width', '25')
-            .attr('x', xScale('female'))
-            .attr('height', d => {
-                return yScale(genderMax - reducedFemales)
-            })
+            .attr('x', xGenderScale('female'))
+            .attr('height', `${yGenderScale(genderMax - reducedFemales)}`)
             .attr('fill', FEMALE_COLOR)
             .style('opacity', '1')
-            .attr("transform", (d,i) => {
-                return `translate(${xScale('female') - 150}, ${barHeight - yScale(genderMax - reducedFemales)})`
-            })
+            .attr("transform", `translate(${xGenderScale('female') - 150}, ${barHeight - yGenderScale(genderMax - reducedFemales)})`)
+
+        // males rect
+        genderBarG
+            // .data(genders['male'])
+            // .enter()
+            // .data([0])
+            .append('rect')
+            .attr('class', 'death-bar .death-bar-male')
+            .attr('width', '25')
+            .attr('x', xGenderScale('male'))
+            .attr('height', `${yGenderScale(genderMax - reducedMales)}`)
+            .attr('fill', MALE_COLOR)
+            .style('opacity', '1')
+            .attr("transform", `translate(${xGenderScale('male') - 25}, ${barHeight - yGenderScale(genderMax - reducedMales)})`)
 
         // Age Bar chart
         let ageBarWidth = 500;
-        let maxHeight = 200;
-        let ageGroups = [[0, "0-10"], [1, "11-20"], [2, "21-40"], [3, "41-60"], [4, "61-80"], [5, "> 80"]]
+        maxAgeHeight = 200;
+        ageGroups = [[0, "0-10"], [1, "11-20"], [2, "21-40"], [3, "41-60"], [4, "61-80"], [5, "> 80"]]
 
         // Age bar scales
-        const xAgeScale = d3.scaleBand().range([0, ageBarWidth]).domain(ageGroups.map(ag => ag[1])).padding(0.4).align(.5)
-        const yAgeScale = d3.scaleLinear().rangeRound([barHeight, 0]).domain([0, maxHeight]);
+        xAgeScale = d3.scaleBand().range([0, ageBarWidth]).domain(ageGroups.map(ag => ag[1])).padding(0.4).align(.5)
+        yAgeScale = d3.scaleLinear().rangeRound([barHeight, 0]).domain([0, maxAgeHeight]);
 
         // Age bar offset
         const ageBarG = ageBarChart.append("g")
@@ -631,21 +686,19 @@
         // iterate through age info to create rects
         ageGroups.forEach(ag => {
             let reducedAge = ages[ag[0]].reduce((accum, obj) => accum + parseInt(obj.deaths), 0)
-            console.log(reducedAge);
-            ageBarG.selectAll('.death-bar-age')
-                .data(ages[ag[0]])
-                .enter()
+            ageBarG
+                // .data([0])
                 .append('rect')
-                .attr('class', 'death-bar')
+                .attr('class', `death-bar .death-bar-age-${ag}`)
                 .attr('width', '25')
                 .attr('x', xAgeScale(ag[1]))
                 .attr('height', d => {
-                    return  yAgeScale(maxHeight - reducedAge)
+                    return  yAgeScale(maxAgeHeight - reducedAge)
                 })
                 .attr('fill', 'steelblue')
                 .style('opacity', '1')
                 .attr("transform", (d,i) => {
-                    return `translate(${xAgeScale(ag[1]) - (20 + (78 * ag[0]))}, ${barHeight - yAgeScale(maxHeight - reducedAge)})`
+                    return `translate(${xAgeScale(ag[1]) - (20 + (78 * ag[0]))}, ${barHeight - yAgeScale(maxAgeHeight - reducedAge)})`
                 })
         });
 
