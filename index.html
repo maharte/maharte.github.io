@@ -4,44 +4,81 @@
     <meta charset="UTF-8">
     <title>Title</title>
     <script src="https://d3js.org/d3.v6.js"></script>
+    <style>
+        ul {
+            list-style-type: none;
+            margin: -8px;
+            padding: 0;
+            overflow: hidden;
+            background-color: #333;
+            height:39px;
+        }
+
+        li {
+            float: left;
+        }
+
+        li a {
+            display: block;
+            color: white;
+            text-align: center;
+            padding: 14px 16px;
+            text-decoration: none;
+        }
+
+        li a:hover {
+            background-color: #111;
+        }
+        body {
+            margin-top:0;
+        }
+    </style>
 </head>
-<body>
-<svg id="pump-legend" style="margin-left: 25px; margin-top:15px; width: 350px; height: 110px; display:inline-block"></svg>
-<div style="display:inline-block; transform: translateY(-120%); margin-left: 20px;">
-    <div>
-        <label for="deathByAge">Filter by Age</label>
-        <select name="deathByAge" id="deathByAge" onchange="filterPumps()" style="margin-left: 21px; width: 72px;">>
-            <option value="-1">All</option>
-            <option value="0">0-10</option>
-            <option value="1">11-20</option>
-            <option value="2">21-40</option>
-            <option value="3">41-60</option>
-            <option value="4">61-80</option>
-            <option value="5">> 80</option>
-        </select>
+<body style="overflow: hidden;">
+<ul>
+    <li><a href="index.html">Visualization</a></li>
+    <li><a href="about.html">About</a></li>
+    <li><a href="documentation.html">Documenation</a></li>
+    <li><a href="video.html">Video</a></li>
+</ul>
+
+<div style="margin-left: 10px;">
+    <svg id="pump-legend" style="margin-left: 25px; margin-top:15px; width: 350px; height: 110px; display:inline-block"></svg>
+    <div style="display:inline-block; transform: translateY(-120%); margin-left: 20px;">
+        <div>
+            <label for="deathByAge">Filter by Age</label>
+            <select name="deathByAge" id="deathByAge" onchange="filterPumps()" style="margin-left: 21px; width: 72px;">>
+                <option value="-1">All</option>
+                <option value="0">0-10</option>
+                <option value="1">11-20</option>
+                <option value="2">21-40</option>
+                <option value="3">41-60</option>
+                <option value="4">61-80</option>
+                <option value="5">> 80</option>
+            </select>
+        </div>
+
+        <div>
+            <label for="deathByGender">Filter by Gender</label>
+            <select name="deathByGender" id="deathByGender" onchange="filterPumps()" >
+                <option value="-1">All</option>
+                <option value="male">Male</option>
+                <option value="female">Female</option>
+            </select>
+        </div>
     </div>
 
-    <div>
-        <label for="deathByGender">Filter by Gender</label>
-        <select name="deathByGender" id="deathByGender" onchange="filterPumps()" >
-            <option value="-1">All</option>
-            <option value="male">Male</option>
-            <option value="female">Female</option>
-        </select>
+    <br>
+    <div style="border: solid lightgrey;width: 400px; height: 375px; overflow: hidden; display:inline-block">
+        <svg id="pump_map" style="background-color:seashell; transform: scale(1, -1);" viewBox="0 0 525 550"></svg>
     </div>
+
+    <!--</div>-->
+    <svg id="timeline" style="width: 800px; height: 375px;"></svg>
+    <br>
+    <svg id="gender-bar-chart" style="margin-right: 100px; width: 400px; height: 255px;"></svg>
+    <svg id="age-bar-chart" style="width: 600px; height: 255px;"></svg>
 </div>
-
-<br>
-<div style="border: solid lightgrey;width: 400px; height: 375px; overflow: hidden; display:inline-block">
-    <svg id="pump_map" style="background-color:seashell; transform: scale(1, -1);" viewBox="0 0 525 550"></svg>
-</div>
-
-<!--</div>-->
-<svg id="timeline" style="width: 800px; height: 375px;"></svg>
-<br>
-<svg id="gender-bar-chart" style="margin-right: 100px; width: 400px; height: 255px;"></svg>
-<svg id="age-bar-chart" style="width: 600px; height: 255px;"></svg>
-
 <script>
     files = []
     files.push(d3.json("./streets.json"));

@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+    <style>
+        .navbar {
+            list-style-type: none;
+            margin: -8px;
+            padding: 0;
+            overflow: hidden;
+            background-color: #333;
+            height:39px;
+        }
+
+        .navbar-item {
+            float: left;
+        }
+
+        .navbar-item a {
+            display: block;
+            color: white;
+            text-align: center;
+            padding: 14px 16px;
+            text-decoration: none;
+        }
+
+        .navbar-item a:hover {
+            background-color: #111;
+        }
+        body {
+            margin-top:0;
+        }
+        pre {
+            margin:0;
+            width:200px;
+        }
+        pre code {
+            background-color: #eee;
+            border: 1px solid #999;
+            display: block;
+            padding: 15px;
+
+        }
+    </style>
+</head>
+<body>
+<ul class="navbar">
+    <li class="navbar-item"><a href="index.html">Visualization</a></li>
+    <li class="navbar-item"><a href="about.html">About</a></li>
+    <li class="navbar-item"><a href="documentation.html">Documenation</a></li>
+    <li class="navbar-item"><a href="video.html">Video</a></li>
+</ul>
+<h1 style="margin-bottom: 5px;">About</h1>
+<h3 style="display: inline-block; margin-top: 0; margin-bottom: 5px;">Author: </h3>
+<p style="margin-top: 0;">Matt Harter</p>
+<h3 style="display: inline-block; margin-top: 0; margin-bottom: 5px;">Class: </h3>
+<p style="margin-top: 0;">H517 Visualization Design, Analysis, & Evaluation</p>
+<h3 style="margin-top: 0; margin-bottom: 5px;">Data description: </h3>
+<div style="width:900px">
+    <p style="margin-top: 0;">
+        The data used in the visualizations came from data files provided at the beginning of the project.
+        The information represents the deaths along with metadata about the deaths from London’s 1854 cholera
+        epidemic compiled and visualized originally by Dr. John Snow.  The data is organized in the following files:
+    </p>
+    <ul>
+        <li><strong>streets.json</strong> - gives the coordinates of the streets as a series of line segments. The file is formatted as a JSON array or arrays; The higer-level array is essentailly a list of all street segments. Each street segment is, in turn, an array containing X,Y tuples represnting vertices of the segment.
+            <pre>
+            <code>
+[
+    [
+    // segment 1
+    {x1,y1},
+    {x2,y2},
+    {x3,y3}
+    ],
+
+    [
+    // segment 2
+    {x1,y1},
+    {x2,y2}
+    ],
+    ...
+]
+            </code>
+</pre>
+            Here's how to visualize the street map: draw a series of lines connecting {x1,y1}, {x2,y2}, and {x3,y3}. This would give you one street segment. To draw the entire map, you would (individually) draw all of the segments in the file.
+        </li>
+
+        <li><strong>pumps.csv</strong> - gives the locations of the 13 nearby pumps</li>
+        <li><strong>deathdays.csv</strong> - gives the number of deaths for each day of the outbreak</li>
+        <li><strong>deaths_age_sex.csv</strong> - gives the location of each death in the deathdays file, in order, plus information on the age and sex of the victim.
+
+            <pre>
+            <code>
+age      code
+0-10      0
+11-20     1
+21-40     2
+41-60     3
+61-80     4
+> 80      5
+
+male 0, Female 1
+            </code>
+        </pre>
+        </li>
+
+
+    </ul>
+</div>
+
+
+
+</body>
+</html>
