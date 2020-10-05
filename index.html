@@ -44,7 +44,7 @@
 
 <div style="margin-left: 10px;">
     <svg id="pump-legend" style="margin-left: 25px; margin-top:15px; width: 350px; height: 110px; display:inline-block"></svg>
-    <div style="display:inline-block; transform: translateY(-120%); margin-left: 20px;">
+    <div style="display:inline-block; transform: translateY(-30%); margin-left: 20px;">
         <div>
             <label for="deathByAge">Filter by Age</label>
             <select name="deathByAge" id="deathByAge" onchange="filterPumps()" style="margin-left: 21px; width: 72px;">>
@@ -65,6 +65,12 @@
                 <option value="male">Male</option>
                 <option value="female">Female</option>
             </select>
+        </div>
+        <div>
+            <p style="margin:0;">Hover over <strong>Deaths Per Day</strong> to filter by day</p>
+        </div>
+        <div>
+            <p style="margin:0;">Scroll or click/drag to move around the map</p>
         </div>
     </div>
 
@@ -742,6 +748,10 @@
     }
 
     Promise.all(files).then((data) => {
+        // This is to prevent the selectboxes from getting out of sync
+        document.getElementById("deathByAge").value = '-1';
+        document.getElementById("deathByGender").value = '-1';
+
         createMap(data[0]);
         addPumps(data[1]);
         let aggDeaths = splitDeathsByDay(data[2], data[3]);
