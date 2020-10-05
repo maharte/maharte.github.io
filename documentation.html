@@ -51,7 +51,54 @@
     <li class="navbar-item"><a href="documentation.html">Documenation</a></li>
     <li class="navbar-item"><a href="video.html">Video</a></li>
 </ul>
-<h1 style="margin-bottom: 5px;">Documentation</h1>
+<div style="width:900px">
+    <h1 style="margin-bottom: 5px;">Documentation</h1>
 
+    <h3>Design Process</h3>
+    <p> The design of my visualization was fairly simple.  Unfortunately, the time it took to learn and implement
+        D3 took away from the time I was able to invest in the creativity of the visualization.  My process started
+        with the basics of having an SVG on the page that represented Dr. John Snow’s cholera map.  From there I
+        decided I wanted to visualize the genders by color and the age groups by symbols.  After getting the map
+        recreated, I added the line graph that showed the deaths per day.  I made the decision to align the line
+        graph to the right of the map so that it would be easy to see the day filter applied to the map.  I then
+        decided to simply use bar charts to visualize the age and gender data.  Once again, I would have preferred
+        to spend more time to make the visualization a little more intricate, but the ramp up speed for learning D3
+        as well as the tediousness nature of manually creating SVGs using D3 took away from being more creative with
+        the visualization.   After getting the charts created, I thought that it would be interesting to add an age and
+        gender filter.  The filters are applied to all visualizations (except the deaths/day line graph) and will work
+        with the day filter as well.  In retrospect, it would have been nice to have the age and gender filters work on
+        the timeline graph, but the limited development time prevented the ability to add that feature.  Lastly, the map
+        legend was created to give the user a resource to understand the meaning of the markings on the map, and the
+        zoom/pan functionality was implemented to allow a better view of what was happening around the map.</p>
+    <h3>Rationale</h3>
+    <p>
+        My visualization is not flashy.  I intentionally did not want to overcomplicate the data by adding too much
+        color or overloaded information.  However, there are a few things worth noting in my rationale.  First, and
+        probably most interesting, is the way I encoded the age and gender data on the map.  As explained in the design
+        process, I encoded the gender data with colors (shades of blue and pink) and the ages with symbols.  I chose
+        colors for gender since male and female already have the colors associated with them (infants wear blue if male
+        and pink if female).  The symbols were designated in order to more quickly see metadata about the deaths on the
+        map.  Admittedly, the symbols are difficult to decipher if the map isn’t filtered, but it is still more telling
+        than using a circle.  Another other major design choice was the alignment of the charts.  I spent so much time
+        learning and implement functionality that creativity took a back seat to functionality.  That is why the
+        visualization is quite blocky and boring.  The choice to put the legend and filters at the top of the page was
+        so that it is obvious that filtering is a functionality of the visualization.  The last rationale worth explaining
+        is why I put the ’about’ page in the navbar.  This decision was made because of the limited space for the
+        visualization, and the professor’s desire to have all of the graphs in view without scrolling.  Nonetheless,
+        I preferred the lack of clutter that words would have put in the visualization, and I think it makes the site
+        feel more robust.
+    </p>
+    <h3>Discoveries by Visualization</h3>
+    As I have alluded to many times, almost the entirety of my time was spent developing because of the scope of the
+    project requirements was so vast.  The being said, I did appreciate the how the metadata distinguished deaths.
+    In the first included screen shot you can see how the timeline give an idea of the lifecycle of the disease.
+    <img src="death_peak.png" style="max-width:100%; max-height:100%;">
+    Another interesting observation was the higher deaths in the first and last age brackets.  This intuitively
+    makes sense considering these ages typically have weaker immune systems and succumb to disease before other age groups.
+    <img src="age_graph.png" style="max-width:100%; max-height:100%;">
+    Of course, these observations are aside from the original conclusion that John Snow had, that there is a correlation of deaths to the center pump.  That correlation is just as obvious in my visualization, if not more so.
+
+
+    </div>
 </body>
 </html>

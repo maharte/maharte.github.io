@@ -392,7 +392,7 @@
 
     const createTimeline = (aggDeaths) => {
         const width = 550;
-        const height = 250;
+        const height = 260;
         const yBuffer = 25;
         const xBuffer = 30;
         const timeConv = d3.timeParse("%d-%b");
@@ -492,7 +492,7 @@
         let leftBuffer = xBuffer - 80
         let rectThickness = 60
         const rectData = [{x1:leftBuffer , y1:-rectThickness, x2:leftBuffer + rectThickness, y2:height + rectThickness}, // left of timeline
-            {x1:leftBuffer, y1:-rectThickness, x2:width + rightBuffer, y2:rectThickness - 10}, // top of timeline
+            {x1:leftBuffer, y1:-rectThickness, x2:width + rightBuffer, y2:rectThickness - 40}, // top of timeline
             {x1:width + rightBuffer, y1:0, x2:width + rightBuffer + rectThickness, y2:height + rectThickness}, // right of timeline
             {x1:leftBuffer, y1:height + 25, x2: width + rightBuffer + rectThickness, y2: height + rectThickness * 2} // bottom of timeline
             ]
